@@ -1,0 +1,126 @@
+library(tidyverse)
+library(rstatix)
+library(psych)
+library(ez)
+library(lmerTest)
+library(dplyr)
+library(lme4)
+library("lmerTest")
+library("multcomp")
+library("Matrix")
+library(emmeans)
+library(dplyr)
+library(readr)
+library(tibble)
+
+path <- "FIE_data/"
+files <- list.files(path = path)
+file_paths <- paste0(path, files)
+print(file_paths)
+
+# Define the response categorization function
+categorize_responses <- function(data) {
+  data %>%
+    mutate(
+      Response_Category = case_when(
+        (key_resp_3.keys == "right" | key_resp_7.keys == "right") & !Is_Distractor ~ "Hit",
+        (key_resp_3.keys == "left" | key_resp_7.keys == "left") & Is_Distractor ~ "Correct Rejection",
+        (key_resp_3.keys == "right" | key_resp_7.keys == "right") & Is_Distractor ~ "False Alarm",
+        (key_resp_3.keys == "left" | key_resp_7.keys == "left") & !Is_Distractor ~ "Miss",
+        TRUE ~ "Uncategorized"  # Handles unexpected cases
+      )
+    )
+}
+
+response_mapping <- c("Hit" = 1, "Correct Rejection" = 1, "False Alarm" = 0, "Miss" = 0)
+
+# Set a seed for reproducibility
+set.seed(42)
+
+# Create an empty tibble to store the combined data
+df <- tibble()
+
+  # Read the current CSV file
+# Loop through each file
+for (file in file_paths) {
+  
+  df_id <- read_csv(file, col_names = TRUE)
+
+  # Generate a random unique ID for this subject
+  IDnew <- sample.int(9999, 1)
+  
+  # Process the file
+  df_id <- df_id %>%
+    mutate(IDnew = IDnew) %>%  # Add the new ID column
+    dplyr::select(IDnew, Displacement_Angle, Stimulus, thisN, Is_Distractor, key_resp_3.keys, 
+           key_resp_3.rt, key_resp_7.keys, key_resp_7.rt) %>%  # Select and reorder columns
+    categorize_responses()  # Apply the categorization function
+  
+  # Append the current data to the combined DataFrame
+  df <- bind_rows(df, df_id)
+}
+colnames(df_id)
+
+df <- df %>%
+  mutate(
+    Combined_RT = coalesce(key_resp_3.rt, key_resp_7.rt),
+    Combined_Key = coalesce(key_resp_3.keys, key_resp_7.keys),
+    Response_Category_numeric = coalesce(response_mapping[Response_Category])# Combine the columns, prioritizing non-NA values
+  )
+
+
+df$Displacement_Angle <- as.factor(df$Displacement_Angle)
+df$IDnew <- as.factor(df$IDnew)
+
+remove_outliers <- function(data, column_name, sd_threshold = 3) {
+  # Remove rows with NA values for the specified column
+  valid_values <- data[[column_name]][!is.na(data[[column_name]])]
+  
+  # If no valid data, return the original data unchanged
+  if (length(valid_values) == 0) {
+    cat("No valid values for column:", column_name, "\n")
+    return(data)  # Return original data if no valid values
+  }
+  
+  # Calculate mean and SD
+  mean_value <- mean(valid_values, na.rm = TRUE)
+  sd_value <- sd(valid_values, na.rm = TRUE)
+  
+  # If SD is 0, return the data unchanged (no variation)
+  if (sd_value == 0) {
+    cat("Standard deviation is 0 for column:", column_name, "\n")
+    return(data)  # Return the original data unchanged
+  }
+  
+  # Debugging output
+  cat("Column:", column_name, "\n")
+  cat("Mean:", mean_value, "SD:", sd_value, "\n")
+  cat("Lower Threshold:", mean_value - sd_threshold * sd_value, "\n")
+  cat("Upper Threshold:", mean_value + sd_threshold * sd_value, "\n")
+  
+  # Filter out rows that are outside the threshold
+  data <- data %>%
+    group_by(IDnew) %>% 
+    filter(
+      !is.na(.data[[column_name]]) &  # Ensure we're not including NA values
+      abs(.data[[column_name]] - mean_value) <= sd_threshold * sd_value  # Apply the threshold
+    )
+  
+  return(data)
+}
+
+# Applying the outlier removal to the dataset
+df_no_outliers <- df %>%
+  filter(Response_Category != "Uncategorized") %>% # Filter out Uncategorized responses
+  remove_outliers("Combined_RT", sd_threshold = 3)
+
+# View cleaned data
+print(df_no_outliers)
+
+
+df_no_outliers$Displacement_Angle <- as.factor(df_no_outliers$Displacement_Angle)
+levels(df_no_outliers$Displacement_Angle)
+df_no_outliers$IDnew <- as.factor(df_no_outliers$IDnew)
+
+
+
