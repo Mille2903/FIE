@@ -1,0 +1,61 @@
+import cv2
+import os
+from PIL import Image
+
+def detect_faces(image_path):
+    # Load the cascade classifier for face detection
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+    # Read the image
+    img = cv2.imread(image_path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Detect faces
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    # Return the list of faces (coordinates of each face)
+    return faces
+
+def process_image(image_path, output_path, target_size=(400, 400)):
+    faces = detect_faces(image_path)
+
+    if len(faces) == 0:
+        print(f"No face detected in {image_path}")
+        return
+
+    # Open the image using Pillow
+    img = Image.open(image_path)
+    
+    for (x, y, w, h) in faces:
+        # Crop the face tightly
+        face = img.crop((x, y, x + w, y + h))
+
+        # Resize the face to fit the target size while maintaining the center
+        face = face.resize(target_size, Image.Resampling.LANCZOS)
+
+        # Create a new image with a blank background and center the face
+        new_img = Image.new('RGB', target_size, (255, 255, 255))  # White background
+        new_img.paste(face, ((target_size[0] - face.width) // 2, (target_size[1] - face.height) // 2))
+
+        # Save the processed image
+        new_img.save(output_path)
+        print(f"Processed image saved to {output_path}")
+
+def process_folder(input_folder, output_folder, target_size=(400, 400)):
+    # Ensure output folder exists
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Loop through all images in the input folder
+    for filename in os.listdir(input_folder):
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            image_path = os.path.join(input_folder, filename)
+            output_path = os.path.join(output_folder, filename)
+
+            process_image(image_path, output_path, target_size)
+
+if __name__ == "__main__":
+    input_folder = "/Users/milleholm/Desktop/sort_hvid2"
+    output_folder = "/Users/milleholm/Desktop/cropped"
+
+    process_folder(input_folder, output_folder)
