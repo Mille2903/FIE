@@ -1,0 +1,22 @@
+# Sti til mappen med billederne
+folder_path = '/Users/milleholm/Desktop/Test4'  # Opdater denne sti, hvis nødvendigt
+output_folder = os.path.join(folder_path, 'sort_hvid2')
+
+# Opret en undermappe til sort/hvide billeder
+os.makedirs(output_folder, exist_ok=True)
+print(f"Billeder gemmes i mappen: {output_folder}")
+
+# Loop gennem alle filer i mappen og konverter dem til sort/hvid
+for filename in os.listdir(folder_path):
+    if filename.endswith(('.png', '.jpg', '.jpeg')):  # Tilføj flere filtyper om nødvendigt
+        img_path = os.path.join(folder_path, filename)
+        
+        try:
+            img = Image.open(img_path).convert('L')  # 'L' konverterer til gråskala
+            save_path = os.path.join(output_folder, filename)
+            img.save(save_path)
+            print(f"{filename} er blevet konverteret og gemt som: {save_path}")
+        except Exception as e:
+            print(f"Fejl ved behandling af {filename}: {e}")
+
+print("Alle billeder, der kunne behandles, er nu konverteret til sort/hvid.")
