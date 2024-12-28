@@ -1,0 +1,34 @@
+
+
+library(ggplot2)
+library(dplyr)
+
+# Combine key_resp_3.keys and key_resp_7.keys into a single column
+df <- df %>%
+  mutate(
+    response = coalesce(key_resp_3.keys, key_resp_7.keys)  # Combine columns, preferring non-NA values
+  )
+
+# Calculate the proportion of "right" responses and SEM by angle
+summary_data <- df %>%
+  group_by(Displacement_Angle) %>%
+  summarise(
+    proportion_right = mean(response == "right", na.rm = TRUE),  # Proportion of "right" responses
+    sem = sd(response == "right", na.rm = TRUE) / sqrt(n())  # Standard error of the mean
+  )
+
+# Create the plot
+ggplot(summary_data, aes(x = Displacement_Angle, y = proportion_right, group = 1)) +
+  geom_point(size = 3) +  # Plot the points
+  geom_line(size = 1) +  # Add lines between the points
+  geom_errorbar(aes(ymin = proportion_right - sem, ymax = proportion_right + sem), width = 0.2) +  # Add error bars
+  theme_minimal() +  # Minimal theme
+  labs(
+    title = "Proportion of 'Right' Responses by Displacement Angle",
+    x = "Displacement Angle",
+    y = "Proportion of 'Right' Responses"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for better readability
+  )
+
