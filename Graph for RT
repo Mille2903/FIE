@@ -6,13 +6,14 @@ df_no_outliers %>%
     sd = sd(Combined_RT, na.rm = TRUE),
     n = n()  # Number of observations
   ) %>%
-  ggplot(aes(x = factor(Displacement_Angle), y = mean)) +  # Factor for discrete x-axis
-  geom_col(position = position_dodge(), fill = "skyblue") +  # Bar chart
-  geom_errorbar(
-    aes(ymin = mean - (1.96 * sd / sqrt(n)), ymax = mean + (1.96 * sd / sqrt(n))), 
-    width = 0.2, 
-    position = position_dodge()
-  ) +  # Error bars with 95% CI
+  ggplot(aes(x = factor(Displacement_Angle), y = mean, group = 1)) +  # Factor for discrete x-axis
+    geom_line(size = 1, color = "black") +  # Plot the line
+    geom_point(size = 3) +  # Plot the points
+    geom_errorbar(
+      aes(ymin = mean - (1.96 * sd / sqrt(n)), ymax = mean + (1.96 * sd / sqrt(n))), 
+      width = 0.2, 
+      position = position_dodge()
+    ) +  # Error bars with 95% CI  # Error bars with 95% CI
   labs(
     y = "RT",
     x = "Displacement Angle",
@@ -23,3 +24,4 @@ df_no_outliers %>%
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
   )
+
