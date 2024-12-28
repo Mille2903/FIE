@@ -1,0 +1,110 @@
+#Primacy/recency effect for the first block
+# Define the thisN ranges for each phase
+first_thisN <- c(0, 1, 2, 3)
+middle_thisN <- c(15, 16, 17, 18)
+last_thisN <- c(31, 32, 33, 34)
+
+# Function to calculate correctness summary
+correctness_summary <- function(df, phase_thisN, phase_name) {
+  # Step 1: Extract Stimulus numbers for each IDnew in the specified `thisN` range
+  phase_stimuli <- df %>%
+    filter(thisN %in% phase_thisN, Response_Category == "Uncategorized") %>%
+    dplyr::select(IDnew, Stimulus)  # Keep IDnew-Stimulus mapping
+  
+  # Step 2: Find rows matching Stimulus numbers in "non-Uncategorized" responses
+  df %>%
+    filter(Response_Category != "Uncategorized") %>%
+    filter(key_resp_3.keys != "NA") %>% 
+    inner_join(phase_stimuli, by = c("IDnew", "Stimulus")) %>%  # Match by IDnew and Stimulus
+    group_by(IDnew) %>%
+    summarise(
+      Phase = phase_name,
+      CorrectnessRate = mean(Response_Category_numeric, na.rm = TRUE),
+      .groups = "drop"  # Ensure ungrouped output
+    )
+}
+
+# Calculate correctness for each phase
+correctness_results <- bind_rows(
+  correctness_summary(df, first_thisN, "First"),
+  correctness_summary(df, middle_thisN, "Middle"),
+  correctness_summary(df, last_thisN, "Last")
+)
+
+# Print the correctness results
+print(correctness_results)
+
+
+# Verify correctness by checking means for each phase
+
+# Phase-specific means
+First_correct <- correctness_results %>%
+  filter(Phase == "First") %>%
+  pull(CorrectnessRate)
+print(mean(First_correct, na.rm = TRUE))
+
+Middle_correct <- correctness_results %>%
+  filter(Phase == "Middle") %>%
+  pull(CorrectnessRate)
+print(mean(Middle_correct, na.rm = TRUE))
+
+Last_correct <- correctness_results %>%
+  filter(Phase == "Last") %>%
+  pull(CorrectnessRate)
+print(mean(Last_correct, na.rm = TRUE))
+
+#Primacy/recency effect for the second block
+
+# Define the thisN ranges for each phase
+first_thisN <- c(0, 1, 2, 3)
+middle_thisN <- c(15, 16, 17, 18)
+last_thisN <- c(31, 32, 33, 34)
+
+# Function to calculate correctness summary
+correctness_summary <- function(df, phase_thisN, phase_name) {
+  # Step 1: Extract Stimulus numbers for each IDnew in the specified `thisN` range
+  phase_stimuli <- df %>%
+    filter(thisN %in% phase_thisN, Response_Category == "Uncategorized") %>%
+    select(IDnew, Stimulus)  # Keep IDnew-Stimulus mapping
+  
+  # Step 2: Find rows matching Stimulus numbers in "non-Uncategorized" responses
+  df %>%
+    filter(Response_Category != "Uncategorized") %>%
+    filter(key_resp_7.keys != "NA") %>% 
+    inner_join(phase_stimuli, by = c("IDnew", "Stimulus")) %>%  # Match by IDnew and Stimulus
+    group_by(IDnew) %>%
+    summarise(
+      Phase = phase_name,
+      CorrectnessRate = mean(Response_Category_numeric, na.rm = TRUE),
+      .groups = "drop"  # Ensure ungrouped output
+    )
+}
+
+# Calculate correctness for each phase
+correctness_results <- bind_rows(
+  correctness_summary(df, first_thisN, "First"),
+  correctness_summary(df, middle_thisN, "Middle"),
+  correctness_summary(df, last_thisN, "Last")
+)
+
+# Print the correctness results
+print(correctness_results)
+
+
+# Verify correctness by checking means for each phase
+
+# Phase-specific means
+First_correct <- correctness_results %>%
+  filter(Phase == "First") %>%
+  pull(CorrectnessRate)
+print(mean(First_correct, na.rm = TRUE))
+
+Middle_correct <- correctness_results %>%
+  filter(Phase == "Middle") %>%
+  pull(CorrectnessRate)
+print(mean(Middle_correct, na.rm = TRUE))
+
+Last_correct <- correctness_results %>%
+  filter(Phase == "Last") %>%
+  pull(CorrectnessRate)
+print(mean(Last_correct, na.rm = TRUE))
