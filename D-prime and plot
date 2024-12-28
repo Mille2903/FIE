@@ -1,0 +1,51 @@
+calculate_dprime <- function(hits, misses, false_alarms, correct_rejections) {
+  # Calculate hit and false alarm rates with additive smoothing
+  hit_rate <- (hits + 0.5) / (hits + misses + 1)
+  fa_rate <- (false_alarms + 0.5) / (false_alarms + correct_rejections + 1)
+  
+  # Calculate Z-scores
+  dprime <- qnorm(hit_rate) - qnorm(fa_rate)
+  return(dprime)
+}
+
+dprime_results <- df %>%
+  group_by(IDnew, Displacement_Angle) %>%  # Use IDnew instead of participant
+  summarise(
+    hits = sum(correct & Is_Distractor == FALSE, na.rm = TRUE),
+    misses = sum(!correct & Is_Distractor == FALSE, na.rm = TRUE),
+    false_alarms = sum(!correct & Is_Distractor == TRUE, na.rm = TRUE),
+    correct_rejections = sum(correct & Is_Distractor == TRUE, na.rm = TRUE),
+    d_prime = calculate_dprime(hits, misses, false_alarms, correct_rejections)
+  )
+
+library(ggplot2)
+
+# Calculate the standard error for each angle
+average_dprime_by_angle <- dprime_results %>%
+  group_by(Displacement_Angle) %>%
+  summarise(
+    average_d_prime = mean(d_prime, na.rm = TRUE),
+    sem = sd(d_prime, na.rm = TRUE) / sqrt(n())  # Standard error of the mean
+  )
+
+# Filter out rows with NA values in the relevant columns
+average_dprime_by_angle <- average_dprime_by_angle %>%
+  filter(!is.na(Displacement_Angle), !is.na(average_d_prime))
+
+
+# Create the plot
+ggplot(average_dprime_by_angle, aes(x = Displacement_Angle, y = average_d_prime)) +
+  geom_point() + 
+  geom_line(aes(group = 1), size = 1) +  # Ensure lines connect points
+  geom_errorbar(aes(ymin = average_d_prime - sem, ymax = average_d_prime + sem), width = 0.2) +  # Add error bars
+  theme_minimal() +  # Minimal theme
+  labs(
+    title = "Average d-prime by Displacement Angle",
+    x = "Displacement Angle",
+    y = "Average d-prime"
+  ) +
+  scale_y_continuous(limits = c(0, NA)) +  # Start y-axis at 0 and let ggplot determine the upper limit
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for better readability
+  )
+
