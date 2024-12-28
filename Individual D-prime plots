@@ -1,0 +1,27 @@
+
+
+
+
+
+library(ggplot2)
+library(dplyr)
+
+# Lav individuelle plots for hver deltager
+unique_ids <- unique(dprime_results_filtered$IDnew)
+
+for (id in unique_ids) {
+  participant_data <- filter(dprime_results_filtered, IDnew == id)
+  
+  plot <- ggplot(participant_data, aes(x = Displacement_Angle, y = d_prime)) +
+    geom_point() +
+    geom_line() +  # Forbinder punkterne for bedre oversigt
+    theme_minimal() +
+    labs(
+      title = paste("d-prime for Participant", id),
+      x = "Displacement Angle",
+      y = "d-prime"
+    ) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  print(plot)  # Vis plottet
+}
