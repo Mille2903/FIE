@@ -1,0 +1,159 @@
+response_mapping <- c("Hit" = 1, "Correct Rejection" = 1, "False Alarm" = 0, "Miss" = 0)
+
+# Data manipulation and plotting
+df_no_outliers %>%
+  mutate(Response_category_numeric = response_mapping[Response_Category]) %>%  # Convert to numeric
+  group_by(Displacement_Angle) %>%
+  summarise(
+    mean = mean(Response_category_numeric, na.rm = TRUE),
+    print(mean),
+    sd = sd(Response_category_numeric, na.rm = TRUE),
+    n = n()  # Number of observations
+  ) %>%
+  ggplot(aes(x = factor(Displacement_Angle), y = mean, group = 1)) +  # Added group aesthetic for line
+    geom_line(size = 1, color = "black") +  # Plot the line
+    geom_point(size = 3) +  # Plot the points
+    geom_errorbar(
+      aes(ymin = mean - (1.96 * sd / sqrt(n)), ymax = mean + (1.96 * sd / sqrt(n))), 
+      width = 0.2, 
+      position = position_dodge()
+    ) +  # Error bars with 95% CI
+    labs(
+      y = "Proportion Correct (Hits & Correct Rejections)",
+      x = "Displacement Angle",
+      title = "Average Response by Displacement Angle",
+      caption = "Error bars represent 95% Confidence Intervals"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+    )
+```
+
+```{r}
+response_mapping <- c("Hit" = 1, "Correct Rejection" = 0, "False Alarm" = 0, "Miss" = 0)
+
+# Data manipulation and plotting
+df_no_outliers %>%
+  mutate(Response_category_numeric = response_mapping[Response_Category]) %>%  # Convert to numeric
+  group_by(Displacement_Angle) %>%
+  summarise(
+    mean = mean(Response_category_numeric, na.rm = TRUE),
+    sd = sd(Response_category_numeric, na.rm = TRUE),
+    n = n()  # Number of observations
+  ) %>%
+  ggplot(aes(x = factor(Displacement_Angle), y = mean, group = 1)) +  # Added group aesthetic for line
+    geom_line(size = 1, color = "black") +  # Plot the line
+    geom_point(size = 3) +  # Plot the points
+    geom_errorbar(
+      aes(ymin = mean - (1.96 * sd / sqrt(n)), ymax = mean + (1.96 * sd / sqrt(n))), 
+      width = 0.2, 
+      position = position_dodge()
+    ) +  # Error bars with 95% CI
+    labs(
+      y = "Proportion Correct (Hits)",
+      x = "Displacement Angle",
+      title = "Average Response by Displacement Angle",
+      caption = "Error bars represent 95% Confidence Intervals"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+    )
+
+```
+
+```{r}
+response_mapping <- c("Hit" = 0, "Correct Rejection" = 1, "False Alarm" = 0, "Miss" = 0)
+
+# Data manipulation and plotting
+df_no_outliers %>%
+  mutate(Response_category_numeric = response_mapping[Response_Category]) %>%  # Convert to numeric
+  group_by(Displacement_Angle) %>%
+  summarise(
+    mean = mean(Response_category_numeric, na.rm = TRUE),
+    sd = sd(Response_category_numeric, na.rm = TRUE),
+    n = n()  # Number of observations
+  ) %>%
+  ggplot(aes(x = factor(Displacement_Angle), y = mean, group = 1)) +  # Added group aesthetic for line
+    geom_line(size = 1, color = "black") +  # Plot the line
+    geom_point(size = 3) +  # Plot the points
+    geom_errorbar(
+      aes(ymin = mean - (1.96 * sd / sqrt(n)), ymax = mean + (1.96 * sd / sqrt(n))), 
+      width = 0.2, 
+      position = position_dodge()
+    ) +  # Error bars with 95% CI
+    labs(
+      y = "Proportion Correct (Correct Rejections)",
+      x = "Displacement Angle",
+      title = "Average Response by Displacement Angle",
+      caption = "Error bars represent 95% Confidence Intervals"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+    )
+
+```
+```{r}
+response_mapping <- c("Hit" = 0, "Correct Rejection" = 0, "False Alarm" = 0, "Miss" = 1)
+
+# Data manipulation and plotting
+df_no_outliers %>%
+  mutate(Response_category_numeric = response_mapping[Response_Category]) %>%  # Convert to numeric
+  group_by(Displacement_Angle) %>%
+  summarise(
+    mean = mean(Response_category_numeric, na.rm = TRUE),
+    sd = sd(Response_category_numeric, na.rm = TRUE),
+    n = n()  # Number of observations
+  ) %>%
+  ggplot(aes(x = factor(Displacement_Angle), y = mean, group = 1)) +  # Added group aesthetic for line
+    geom_line(size = 1, color = "black") +  # Plot the line
+    geom_point(size = 3) +  # Plot the points
+    geom_errorbar(
+      aes(ymin = mean - (1.96 * sd / sqrt(n)), ymax = mean + (1.96 * sd / sqrt(n))), 
+      width = 0.2, 
+      position = position_dodge()
+    ) +  # Error bars with 95% CI
+    labs(
+      y = "Proportion of Mistakes (Miss)",
+      x = "Displacement Angle",
+      title = "Average Response by Displacement Angle",
+      caption = "Error bars represent 95% Confidence Intervals"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+    )
+
+```
+```{r}
+response_mapping <- c("Hit" = 0, "Correct Rejection" = 0, "False Alarm" = 1, "Miss" = 0)
+
+# Data manipulation and plotting
+df_no_outliers %>%
+  mutate(Response_category_numeric = response_mapping[Response_Category]) %>%  # Convert to numeric
+  group_by(Displacement_Angle) %>%
+  summarise(
+    mean = mean(Response_category_numeric, na.rm = TRUE),
+    sd = sd(Response_category_numeric, na.rm = TRUE),
+    n = n()  # Number of observations
+  ) %>%
+  ggplot(aes(x = factor(Displacement_Angle), y = mean, group = 1)) +  # Added group aesthetic for line
+    geom_line(size = 1, color = "black") +  # Plot the line
+    geom_point(size = 3) +  # Plot the points
+    geom_errorbar(
+      aes(ymin = mean - (1.96 * sd / sqrt(n)), ymax = mean + (1.96 * sd / sqrt(n))), 
+      width = 0.2, 
+      position = position_dodge()
+    ) +  # Error bars with 95% CI
+    labs(
+      y = "Proportion Correct (False alarm)",
+      x = "Displacement Angle",
+      title = "Average Response by Displacement Angle",
+      caption = "Error bars represent 95% Confidence Intervals"
+    ) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+    )
