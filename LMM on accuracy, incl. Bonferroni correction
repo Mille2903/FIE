@@ -1,0 +1,37 @@
+lmm<- lmer(Response_Category_numeric ~ Displacement_Angle + (1|IDnew), data = df_no_outliers)
+
+summary(lmm, correlation = TRUE)
+
+p_values_adjusted <- p.adjust(p_values, method = "bonferroni")  # or "fdr", "holm"
+
+# Combine results into a table
+results <- data.frame(
+  Estimate = coef(summary(lmm))[, "Estimate"],
+  Std_Error = coef(summary(lmm))[, "Std. Error"],
+  df = coef(summary(lmm))[, "df"],
+  t_value = coef(summary(lmm))[, "t value"],
+  p_value = p_values,
+  p_value_adjusted = p_values_adjusted
+)
+# Print the results
+print(results)
+
+# Compute estimated marginal means
+em <- emmeans(lmm, ~ Displacement_Angle)
+
+# Specify only adjacent angle comparisons
+adjacent_comparisons <- contrast(
+  em,
+  method = list(
+    "0 to 30" = c(1, -1, 0, 0, 0, 0, 0),
+    "30 to 60" = c(0, 1, -1, 0, 0, 0, 0),
+    "60 to 90" = c(0, 0, 1, -1, 0, 0, 0),
+    "90 to 120" = c(0, 0, 0, 1, -1, 0, 0),
+    "120 to 150" = c(0, 0, 0, 0, 1, -1, 0),
+    "150 to 180" = c(0, 0, 0, 0, 0, 1, -1)
+  ),
+  adjust = "bonferroni" # No global adjustment across all pairs
+)
+
+# Show the results
+adjacent_comparisons
