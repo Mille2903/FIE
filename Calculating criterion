@@ -1,0 +1,28 @@
+counts <- df_no_outliers %>%
+  group_by(Response_Category, Displacement_Angle) %>%
+  summarise(count = n()) %>%
+  pivot_wider(names_from = Response_Category, values_from = count, values_fill = 0)
+
+# Calculate rates
+hits <- counts$Hit
+misses <- counts$Miss
+false_alarms <- counts$'False Alarm'
+correct_rejections <- counts$'Correct Rejection'
+
+HR <- hits / (hits + misses)  # Hit Rate
+FAR <- false_alarms / (false_alarms + correct_rejections)  # False Alarm Rate
+print(HR)
+print(FAR)
+# Avoid extreme values for z-scores
+HR <- ifelse(HR == 1, 0.999, ifelse(HR == 0, 0.001, HR))
+FAR <- ifelse(FAR == 1, 0.999, ifelse(FAR == 0, 0.001, FAR))
+
+# Calculate z-scores
+z_HR <- qnorm(HR)
+z_FAR <- qnorm(FAR)
+
+# Criterion (c)
+c <- -(z_HR + z_FAR) / 2
+
+# Output results
+cat("Criterion (c):", c, "\n")
